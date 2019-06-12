@@ -27,6 +27,7 @@ def lambda_handler(event, context):
                 rule_actions[n]['TargetGroupArn']=http_target_group_arn
                 rule_modded=1
 
+            n +=1
 
         if rule_modded==1:
             results[https_listener_rules[i]['RuleArn']] = elbv2_client.modify_rule(
