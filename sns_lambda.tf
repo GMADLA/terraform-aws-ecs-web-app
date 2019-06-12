@@ -13,7 +13,6 @@ module "update_ssl_rule" {
   namespace      = "${var.namespace}"
   stage          = "${var.stage}"
   attributes     = "${var.attributes}"
-  sns_topic_name = "${module.sns_topic_name.id}"
   elb_region     = "${var.aws_logs_region}"
 
   prod_listener_arn = "${var.alb_prod_listener_arn}"
