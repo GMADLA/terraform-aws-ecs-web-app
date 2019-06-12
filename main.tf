@@ -40,41 +40,6 @@ module "codedeploy_group_label" {
   tags       = "${var.tags}"
 }
 
-# module "alb_ingress" {
-#   source            = "git::https://github.com/cloudposse/terraform-aws-alb-ingress.git?ref=tags/0.7.0"
-#   name              = "${var.name}"
-#   namespace         = "${var.namespace}"
-#   stage             = "${var.stage}"
-#   attributes        = "${var.attributes}"
-#   vpc_id            = "${var.vpc_id}"
-#   port              = "${var.container_port}"
-#   health_check_path = "${var.alb_ingress_healthcheck_path}"
-
-#   authenticated_paths   = ["${var.alb_ingress_authenticated_paths}"]
-#   unauthenticated_paths = ["${var.alb_ingress_unauthenticated_paths}"]
-#   authenticated_hosts   = ["${var.alb_ingress_authenticated_hosts}"]
-#   unauthenticated_hosts = ["${var.alb_ingress_unauthenticated_hosts}"]
-
-#   authenticated_priority   = "${var.alb_ingress_listener_authenticated_priority}"
-#   unauthenticated_priority = "${var.alb_ingress_listener_unauthenticated_priority}"
-
-#   unauthenticated_listener_arns       = "${var.alb_ingress_unauthenticated_listener_arns}"
-#   unauthenticated_listener_arns_count = "${var.alb_ingress_unauthenticated_listener_arns_count}"
-#   authenticated_listener_arns         = "${var.alb_ingress_authenticated_listener_arns}"
-#   authenticated_listener_arns_count   = "${var.alb_ingress_authenticated_listener_arns_count}"
-
-#   authentication_type                        = "${var.authentication_type}"
-#   authentication_cognito_user_pool_arn       = "${var.authentication_cognito_user_pool_arn}"
-#   authentication_cognito_user_pool_client_id = "${var.authentication_cognito_user_pool_client_id}"
-#   authentication_cognito_user_pool_domain    = "${var.authentication_cognito_user_pool_domain}"
-#   authentication_oidc_client_id              = "${var.authentication_oidc_client_id}"
-#   authentication_oidc_client_secret          = "${var.authentication_oidc_client_secret}"
-#   authentication_oidc_issuer                 = "${var.authentication_oidc_issuer}"
-#   authentication_oidc_authorization_endpoint = "${var.authentication_oidc_authorization_endpoint}"
-#   authentication_oidc_token_endpoint         = "${var.authentication_oidc_token_endpoint}"
-#   authentication_oidc_user_info_endpoint     = "${var.authentication_oidc_user_info_endpoint}"
-# }
-
 module "alb_ingress_prod" {
   source            = "git::https://github.com/cloudposse/terraform-aws-alb-ingress.git?ref=tags/0.7.0"
   name              = "${var.name}"
@@ -214,7 +179,7 @@ resource "aws_codedeploy_deployment_group" "default" {
 
 module "ecs_bg_codepipeline" {
   enabled               = "${var.codepipeline_enabled}"
-  source                = "git::https://github.com/GMADLA/terraform-aws-ecs-codepipeline.git?ref=tags/0.10.0-dev.4"
+  source                = "git::https://github.com/GMADLA/terraform-aws-ecs-codepipeline-bg.git?ref=tags/0.0.1"
   name                  = "${var.name}"
   namespace             = "${var.namespace}"
   stage                 = "${var.stage}"
@@ -240,7 +205,9 @@ module "ecs_bg_codepipeline" {
   webhook_filter_json_path    = "${var.webhook_filter_json_path}"
   webhook_filter_match_equals = "${var.webhook_filter_match_equals}"
 
-  blue_green_enabled                = true
+  code_deploy_sns_topic_arn   = "${module.update_ssl_rule.this_sns_topic_arn}"
+  code_deploy_lambda_hook_arns   = "${module.update_ssl_rule.update_ssl_lambda_function_arn}"
+
   code_deploy_application_name      = "${aws_codedeploy_deployment_group.default.app_name}"
   code_deploy_deployment_group_name = "${aws_codedeploy_deployment_group.default.deployment_group_name}"
 
@@ -356,6 +323,4 @@ module "alb_green_target_group_alarms" {
   evaluation_periods             = "${var.alb_target_group_alarms_evaluation_periods}"
 }
 
-# TODO Lambda updating SERVICE TASK ON deploy success, or deploy rollback.
 # TODO BLUE GREEN Deployment Trigger hooks
-# TODO Code Pipeline manual approval
