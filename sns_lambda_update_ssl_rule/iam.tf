@@ -76,7 +76,7 @@ data "aws_iam_policy_document" "lambda_basic" {
     ]
 
     resources = [
-      "${var.ssl_listener_arn}"
+      "${var.ssl_listener_arn}",
       "${format("arn:aws:elasticloadbalancing:%s:*:listener-rule/app/%s/*/*/*", var.elb_region, var.ecs_cluster_name)}"
     ]
   }
