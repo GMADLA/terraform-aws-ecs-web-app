@@ -9,13 +9,13 @@ module "sns_topic_label" {
 data "aws_sns_topic" "this" {
   count = "${(1 - var.create_sns_topic) * var.create}"
 
-  name = "${var.sns_topic_name ? var.sns_topic_name: module.sns_topic_name.id}"
+  name = "${var.sns_topic_name ? var.sns_topic_name: module.sns_topic_label.id}"
 }
 
 resource "aws_sns_topic" "this" {
   count = "${var.create_sns_topic * var.create}"
 
-  name = "${var.sns_topic_name ? var.sns_topic_name: module.sns_topic_name.id}"
+  name = "${var.sns_topic_name ? var.sns_topic_name: module.sns_topic_label.id}"
 }
 
 locals {
