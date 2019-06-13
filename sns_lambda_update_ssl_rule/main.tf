@@ -6,16 +6,24 @@ module "sns_topic_label" {
   attributes = "${compact(concat(var.attributes, list("change", "https", "listener")))}"
 }
 
+module "lambda_label" {
+  source     = "git::https://github.com/cloudposse/terraform-terraform-label.git?ref=tags/0.1.6"
+  name       = "lambda"
+  namespace  = "${var.namespace}"
+  stage      = "${var.stage}"
+  attributes = "${compact(concat(var.attributes, list("change", "https", "listener")))}"
+}
+
 data "aws_sns_topic" "this" {
   count = "${(1 - var.create_sns_topic) * var.create}"
 
-  name = "${var.sns_topic_name ? var.sns_topic_name: module.sns_topic_label.id}"
+  name = "${var.sns_topic_name ? var.sns_topic_name : module.sns_topic_label.id}"
 }
 
 resource "aws_sns_topic" "this" {
   count = "${var.create_sns_topic * var.create}"
 
-  name = "${var.sns_topic_name ? var.sns_topic_name: module.sns_topic_label.id}"
+  name = "${var.sns_topic_name ? var.sns_topic_name : module.sns_topic_label.id}"
 }
 
 locals {
@@ -67,7 +75,7 @@ resource "aws_lambda_function" "update_ssl_rule" {
 
   filename = "${data.archive_file.update_ssl_rule.0.output_path}"
 
-  function_name = "${var.lambda_function_name}"
+  function_name = "${var.lambda_function_name ? var.lambda_function_name : module.lambda_label.id}"
 
   role             = "${aws_iam_role.lambda.arn}"
   handler          = "update_ssl_rule.lambda_handler"

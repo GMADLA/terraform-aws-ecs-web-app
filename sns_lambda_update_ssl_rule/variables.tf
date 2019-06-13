@@ -39,13 +39,13 @@ variable "create" {
 variable "create_sns_topic" {
   type        = "string"
   description = "Whether to create new SNS topic"
-  default     = "true"
+  default     = true
 }
 
 variable "create_with_kms_key" {
   type        = "string"
   description = "Whether to create resources with KMS encryption"
-  default     = "false"
+  default     = false
 }
 
 variable "kms_key_arn" {
@@ -56,7 +56,7 @@ variable "kms_key_arn" {
 
 variable "lambda_function_name" {
   description = "The name of the Lambda function to create"
-  default     = "notify_slack"
+  default     = "update_ssl"
 }
 
 variable "sns_topic_name" {
@@ -75,4 +75,9 @@ variable "prod_listener_arn" {
 
 variable "ssl_listener_arn" {
   description = "SSL Listener ARN update its ingress rules."
+}
+
+variable "ecs_cluster_name" {
+  type        = "string"
+  description = "The ECS Cluster Name to use in ECS Code Pipeline Deployment step"
 }

@@ -15,6 +15,7 @@ module "update_ssl_rule" {
   attributes     = "${var.attributes}"
   elb_region     = "${var.aws_logs_region}"
 
+  ecs_cluster_name  = "${var.ecs_cluster_name}"
   prod_listener_arn = "${var.alb_prod_listener_arn}"
   ssl_listener_arn  = "${var.alb_ssl_listener_arn}"
 }

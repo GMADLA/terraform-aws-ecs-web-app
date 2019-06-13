@@ -1,3 +1,7 @@
+locals {
+  lambda_name = "${var.lambda_function_name ? var.lambda_function_name ? module.lambda_label.id}"
+}
+
 module "default_label" {
   source    = "git::https://github.com/cloudposse/terraform-terraform-label.git?ref=tags/0.1.3"
   name      = "${var.name}"
@@ -13,7 +17,10 @@ data "aws_iam_policy_document" "assume_role" {
 
     actions = ["sts:AssumeRole"]
 
-    principals = ["lambda.amazonaws.com"]
+    principals {
+      type        = "Service"
+      identifiers = ["lambda.amazonaws.com"]
+    }
   }
 }
 
@@ -42,7 +49,7 @@ data "aws_iam_policy_document" "lambda_basic" {
       "logs:PutLogEvents",
     ]
 
-    resources = ["arn:aws:logs:us-west-2:*:log-group:/aws/lambda/ChangeBlueGreenHTTPSListener:*"]
+    resources = ["${format("arn:aws:logs:us-west-2:*:log-group:/aws/lambda/%s:*", local.lambda_name)}"]
   }
 
   statement {
@@ -69,8 +76,8 @@ data "aws_iam_policy_document" "lambda_basic" {
     ]
 
     resources = [
-      "arn:aws:elasticloadbalancing:us-west-2:980046818561:listener/gmadla-dev-cluster/*/*",
-      "arn:aws:elasticloadbalancing:us-west-2:980046818561:listener-rule/app/gmadla-dev-cluster/*/*/*"
+      "${var.ssl_listener_arn}"
+      "${format("arn:aws:elasticloadbalancing:%s:*:listener-rule/app/%s/*/*/*", var.elb_region, var.ecs_cluster_name)}"
     ]
   }
 }
