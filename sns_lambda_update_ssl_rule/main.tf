@@ -31,7 +31,7 @@ locals {
 }
 
 resource "aws_sns_topic_subscription" "sns_update_ssl" {
-  count = "${var.create}"
+  count = "${var.create ? 1 : 0}"
 
   topic_arn = "${local.sns_topic_arn}"
   protocol  = "lambda"
@@ -40,7 +40,7 @@ resource "aws_sns_topic_subscription" "sns_update_ssl" {
 
 
 resource "aws_lambda_permission" "sns_update_ssl" {
-  count = "${var.create}"
+  count = "${var.create ? 1 : 0}"
 
   statement_id  = "AllowExecutionFromSNS"
   action        = "lambda:InvokeFunction"
@@ -62,7 +62,7 @@ data "null_data_source" "lambda_archive" {
 }
 
 data "archive_file" "update_ssl_rule" {
-  count = "${var.create}"
+  count = "${var.create ? 1 : 0}"
 
   type        = "zip"
   source_file = "${data.null_data_source.lambda_file.outputs.filename}"
@@ -71,7 +71,7 @@ data "archive_file" "update_ssl_rule" {
 
 
 resource "aws_lambda_function" "update_ssl_rule" {
-  count = "${var.create}"
+  count = "${var.create ? 1 : 0}"
 
   filename      = "${data.archive_file.update_ssl_rule.0.output_path}"
   function_name = "${var.lambda_function_name == "" ? module.lambda_label.id: var.lambda_function_name}"

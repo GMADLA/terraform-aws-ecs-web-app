@@ -10,7 +10,7 @@ module "default_label" {
 }
 
 data "aws_iam_policy_document" "assume_role" {
-  count = "${var.create}"
+  count = "${var.create ? 1 : 0}"
 
   statement {
     effect = "Allow"
@@ -25,7 +25,7 @@ data "aws_iam_policy_document" "assume_role" {
 }
 
 data "aws_iam_policy_document" "lambda_basic" {
-  count = "${var.create}"
+  count = "${var.create ? 1 : 0}"
 
   statement {
     sid = "AllowWriteLogGroup"
@@ -99,14 +99,14 @@ data "aws_iam_policy_document" "lambda" {
 }
 
 resource "aws_iam_role" "lambda" {
-  count = "${var.create}"
+  count = "${var.create ? 1 : 0}"
 
   name_prefix        = "lambda"
   assume_role_policy = "${data.aws_iam_policy_document.assume_role.0.json}"
 }
 
 resource "aws_iam_role_policy" "lambda" {
-  count = "${var.create}"
+  count = "${var.create ? 1 : 0}"
 
   name_prefix = "lambda-policy-"
   role        = "${aws_iam_role.lambda.0.id}"
