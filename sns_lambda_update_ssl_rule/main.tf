@@ -73,9 +73,8 @@ data "archive_file" "update_ssl_rule" {
 resource "aws_lambda_function" "update_ssl_rule" {
   count = "${var.create}"
 
-  filename = "${data.archive_file.update_ssl_rule.0.output_path}"
-
-  function_name = "${var.lambda_function_name ? var.lambda_function_name : module.lambda_label.id}"
+  filename      = "${data.archive_file.update_ssl_rule.0.output_path}"
+  function_name = "${var.lambda_function_name == "" ? module.lambda_label.id: var.lambda_function_name}"
 
   role             = "${aws_iam_role.lambda.arn}"
   handler          = "update_ssl_rule.lambda_handler"

@@ -55,8 +55,9 @@ variable "kms_key_arn" {
 }
 
 variable "lambda_function_name" {
+  type        = "string"
   description = "The name of the Lambda function to create"
-  default     = "update_ssl"
+  default     = ""
 }
 
 variable "sns_topic_name" {

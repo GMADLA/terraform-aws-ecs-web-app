@@ -1,5 +1,5 @@
 locals {
-  lambda_name = "${var.lambda_function_name ? var.lambda_function_name : module.lambda_label.id}"
+  lambda_name = "${var.lambda_function_name == "" ? module.lambda_label.id: var.lambda_function_name}"
 }
 
 module "default_label" {
