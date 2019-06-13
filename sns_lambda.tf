@@ -1,9 +1,5 @@
 locals {
-  ssl_enabled = "${var.alb_ssl_listener_arn ? true : false}"
-}
-
-data "aws_lb_listener" "ssl_listener" {
-  arn = "${var.alb_ssl_listener_arn}"
+  ssl_enabled = "${var.alb_ssl_listener_arn == "" ? false : true}"
 }
 
 module "update_ssl_rule" {
