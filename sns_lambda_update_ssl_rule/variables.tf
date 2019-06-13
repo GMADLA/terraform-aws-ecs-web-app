@@ -37,13 +37,11 @@ variable "create" {
 }
 
 variable "create_sns_topic" {
-  type        = "string"
   description = "Whether to create new SNS topic"
   default     = true
 }
 
 variable "create_with_kms_key" {
-  type        = "string"
   description = "Whether to create resources with KMS encryption"
   default     = false
 }
