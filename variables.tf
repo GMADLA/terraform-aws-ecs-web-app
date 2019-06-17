@@ -628,6 +628,7 @@ variable "alb_prod_listener_arn" {
 variable "alb_ssl_listener_arn" {
   type        = "string"
   description = "The ALB SSL Listener ARN"
+  default     = ""
 }
 
 variable "alb_test_listener_arn" {

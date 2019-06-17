@@ -125,10 +125,72 @@ resource "aws_codedeploy_app" "default" {
 }
 
 resource "aws_codedeploy_deployment_group" "default" {
+  count = "${var.alb_ssl_listener_arn == "" ? 1 : 0}"
+
   app_name               = "${aws_codedeploy_app.default.name}"
   deployment_config_name = "CodeDeployDefault.ECSAllAtOnce"
   deployment_group_name  = "${module.codedeploy_group_label.id}"
   service_role_arn       =  "${module.ecs_alb_service_task.service_role_arn}"
+
+  auto_rollback_configuration {
+    enabled = true
+    events = ["DEPLOYMENT_FAILURE"]
+  }
+
+  blue_green_deployment_config {
+    deployment_ready_option {
+      action_on_timeout = "CONTINUE_DEPLOYMENT"
+    }
+
+    terminate_blue_instances_on_deployment_success {
+      action                           = "TERMINATE"
+      termination_wait_time_in_minutes = 5
+    }
+  }
+
+  deployment_style {
+    deployment_option = "WITH_TRAFFIC_CONTROL"
+    deployment_type   = "BLUE_GREEN"
+  }
+
+  ecs_service {
+    cluster_name = "${var.ecs_cluster_name}"
+    service_name = "${module.ecs_alb_service_task.service_name}"
+  }
+
+  load_balancer_info {
+    target_group_pair_info {
+      prod_traffic_route {
+        listener_arns = ["${var.alb_prod_listener_arn}"]
+      }
+
+      target_group {
+        name = "${var.alb_target_group_blue_arn}"
+      }
+
+      target_group {
+        name = "${var.alb_target_group_green_arn}"
+      }
+
+      test_traffic_route {
+        listener_arns = ["${var.alb_test_listener_arn}"]
+      }
+    }
+  }
+}
+
+resource "aws_codedeploy_deployment_group" "with_ssl" {
+  count = "${var.alb_ssl_listener_arn == "" ? 0 : 1}"
+  app_name               = "${aws_codedeploy_app.default.name}"
+  deployment_config_name = "CodeDeployDefault.ECSAllAtOnce"
+  deployment_group_name  = "${module.codedeploy_group_label.id}"
+  service_role_arn       =  "${module.ecs_alb_service_task.service_role_arn}"
+
+  trigger_configurations {
+    trigger_events     = ["DeploymentSuccess", "DeploymentFailure", "DeploymentReady", "DeploymentFailure"]
+    trigger_name       = "Update SSL Rule"
+    trigger_target_arn = "${module.update_ssl_rule.this_sns_topic_arn}"
+  }
 
   auto_rollback_configuration {
     enabled = true
@@ -208,8 +270,8 @@ module "ecs_bg_codepipeline" {
   code_deploy_sns_topic_arn   = "${module.update_ssl_rule.this_sns_topic_arn}"
   code_deploy_lambda_hook_arns   = "${module.update_ssl_rule.update_ssl_lambda_function_arn}"
 
-  code_deploy_application_name      = "${aws_codedeploy_deployment_group.default.app_name}"
-  code_deploy_deployment_group_name = "${aws_codedeploy_deployment_group.default.deployment_group_name}"
+  code_deploy_application_name      = "${var.alb_ssl_listener_arn == "" ? aws_codedeploy_deployment_group.default.app_name : aws_codedeploy_deployment_group.with_ssl.app_name }"
+  code_deploy_deployment_group_name = "${var.alb_ssl_listener_arn == "" ? aws_codedeploy_deployment_group.default.deployment_group_name : aws_codedeploy_deployment_group.with_ssl.deployment_group_name }"
 
   environment_variables = [{
     "name"  = "CONTAINER_NAME"
