@@ -184,7 +184,7 @@ resource "aws_codedeploy_deployment_group" "with_ssl" {
   app_name               = "${aws_codedeploy_app.default.name}"
   deployment_config_name = "CodeDeployDefault.ECSAllAtOnce"
   deployment_group_name  = "${module.codedeploy_group_label.id}"
-  service_role_arn       =  "${module.ecs_alb_service_task.service_role_arn}"
+  service_role_arn       = "${module.ecs_alb_service_task.service_role_arn}"
 
   trigger_configuration {
     trigger_events     = ["DeploymentSuccess", "DeploymentFailure", "DeploymentReady", "DeploymentFailure"]
@@ -270,8 +270,8 @@ module "ecs_bg_codepipeline" {
   code_deploy_sns_topic_arn   = "${module.update_ssl_rule.this_sns_topic_arn}"
   code_deploy_lambda_hook_arns   = "${module.update_ssl_rule.update_ssl_lambda_function_arn}"
 
-  code_deploy_application_name      = "${var.alb_ssl_listener_arn == "" ? aws_codedeploy_deployment_group.default.app_name : aws_codedeploy_deployment_group.with_ssl.app_name }"
-  code_deploy_deployment_group_name = "${var.alb_ssl_listener_arn == "" ? aws_codedeploy_deployment_group.default.deployment_group_name : aws_codedeploy_deployment_group.with_ssl.deployment_group_name }"
+  code_deploy_application_name      = "${aws_codedeploy_app.default.name}"
+  code_deploy_deployment_group_name = "${module.codedeploy_group_label.id}"
 
   environment_variables = [{
     "name"  = "CONTAINER_NAME"
