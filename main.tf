@@ -186,7 +186,7 @@ resource "aws_codedeploy_deployment_group" "with_ssl" {
   deployment_group_name  = "${module.codedeploy_group_label.id}"
   service_role_arn       =  "${module.ecs_alb_service_task.service_role_arn}"
 
-  trigger_configurations {
+  trigger_configuration {
     trigger_events     = ["DeploymentSuccess", "DeploymentFailure", "DeploymentReady", "DeploymentFailure"]
     trigger_name       = "Update SSL Rule"
     trigger_target_arn = "${module.update_ssl_rule.this_sns_topic_arn}"
