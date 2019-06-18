@@ -1,6 +1,6 @@
 module "sns_topic_label" {
   source     = "git::https://github.com/cloudposse/terraform-terraform-label.git?ref=tags/0.1.6"
-  name       = "sns"
+  name       = "${format("sns-%s", var.name)}"
   namespace  = "${var.namespace}"
   stage      = "${var.stage}"
   attributes = "${compact(concat(var.attributes, list("change", "https", "listener")))}"
@@ -8,7 +8,7 @@ module "sns_topic_label" {
 
 module "lambda_label" {
   source     = "git::https://github.com/cloudposse/terraform-terraform-label.git?ref=tags/0.1.6"
-  name       = "lambda"
+  name       = "${format("lambda-%s", var.name)}"
   namespace  = "${var.namespace}"
   stage      = "${var.stage}"
   attributes = "${compact(concat(var.attributes, list("change", "https", "listener")))}"
