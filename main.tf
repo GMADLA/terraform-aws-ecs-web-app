@@ -241,7 +241,7 @@ resource "aws_codedeploy_deployment_group" "with_ssl" {
 
 module "ecs_bg_codepipeline" {
   enabled               = "${var.codepipeline_enabled}"
-  source                = "git::https://github.com/GMADLA/terraform-aws-ecs-codepipeline-bg.git?ref=tags/0.0.5"
+  source                = "git::https://github.com/GMADLA/terraform-aws-ecs-codepipeline-bg.git?ref=tags/0.0.6"
   name                  = "${var.name}"
   namespace             = "${var.namespace}"
   stage                 = "${var.stage}"
