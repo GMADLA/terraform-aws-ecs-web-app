@@ -40,12 +40,12 @@ module "codedeploy_group_label" {
   tags       = "${var.tags}"
 }
 
-module "alb_ingress_prod" {
+module "alb_ingress_blue" {
   source            = "git::https://github.com/cloudposse/terraform-aws-alb-ingress.git?ref=tags/0.7.0"
   name              = "${var.name}"
   namespace         = "${var.namespace}"
   stage             = "${var.stage}"
-  attributes        = ["${var.attributes}", "prod"]
+  attributes        = ["${var.attributes}", "blue"]
   vpc_id            = "${var.vpc_id}"
   port              = "${var.container_port}"
   health_check_path = "${var.alb_ingress_healthcheck_path}"
@@ -59,12 +59,12 @@ module "alb_ingress_prod" {
   unauthenticated_listener_arns_count = "${var.alb_ingress_prod_listener_arns_count}"
 }
 
-module "alb_ingress_test" {
+module "alb_ingress_green" {
   source            = "git::https://github.com/cloudposse/terraform-aws-alb-ingress.git?ref=tags/0.7.0"
   name              = "${var.name}"
   namespace         = "${var.namespace}"
   stage             = "${var.stage}"
-  attributes        = ["${var.attributes}", "test"]
+  attributes        = ["${var.attributes}", "green"]
   vpc_id            = "${var.vpc_id}"
   port              = "${var.container_port}"
   health_check_path = "${var.alb_ingress_healthcheck_path}"
@@ -102,7 +102,7 @@ module "ecs_alb_service_task" {
   namespace                         = "${var.namespace}"
   stage                             = "${var.stage}"
   attributes                        = "${var.attributes}"
-  alb_target_group_arn              = "${module.alb_ingress_prod.target_group_arn}"
+  alb_target_group_arn              = "${module.alb_ingress_blue.target_group_arn}"
   container_definition_json         = "${module.container_definition.json}"
   container_name                    = "${module.default_label.id}"
   desired_count                     = "${var.desired_count}"
@@ -165,11 +165,11 @@ resource "aws_codedeploy_deployment_group" "default" {
       }
 
       target_group {
-        name = "${module.alb_ingress_prod.target_group_name}"
+        name = "${module.alb_ingress_blue.target_group_name}"
       }
 
       target_group {
-        name = "${module.alb_ingress_test.target_group_name}"
+        name = "${module.alb_ingress_green.target_group_name}"
       }
 
       test_traffic_route {
@@ -225,11 +225,11 @@ resource "aws_codedeploy_deployment_group" "with_ssl" {
       }
 
       target_group {
-        name = "${module.alb_ingress_prod.target_group_name}"
+        name = "${module.alb_ingress_blue.target_group_name}"
       }
 
       target_group {
-        name = "${module.alb_ingress_test.target_group_name}"
+        name = "${module.alb_ingress_green.target_group_name}"
       }
 
       test_traffic_route {
@@ -353,8 +353,8 @@ module "alb_blue_target_group_alarms" {
   insufficient_data_actions      = ["${var.alb_target_group_alarms_insufficient_data_actions}"]
   alb_name                       = "${var.alb_name}"
   alb_arn_suffix                 = "${var.alb_arn_suffix}"
-  target_group_name              = "${module.alb_ingress_prod.target_group_name}"
-  target_group_arn_suffix        = "${module.alb_ingress_prod.target_group_arn_suffix}"
+  target_group_name              = "${module.alb_ingress_blue.target_group_name}"
+  target_group_arn_suffix        = "${module.alb_ingress_blue.target_group_arn_suffix}"
   target_3xx_count_threshold     = "${var.alb_target_group_alarms_3xx_threshold}"
   target_4xx_count_threshold     = "${var.alb_target_group_alarms_4xx_threshold}"
   target_5xx_count_threshold     = "${var.alb_target_group_alarms_5xx_threshold}"
@@ -375,8 +375,8 @@ module "alb_green_target_group_alarms" {
   insufficient_data_actions      = ["${var.alb_target_group_alarms_insufficient_data_actions}"]
   alb_name                       = "${var.alb_name}"
   alb_arn_suffix                 = "${var.alb_arn_suffix}"
-  target_group_name              = "${module.alb_ingress_test.target_group_name}"
-  target_group_arn_suffix        = "${module.alb_ingress_test.target_group_arn_suffix}"
+  target_group_name              = "${module.alb_ingress_green.target_group_name}"
+  target_group_arn_suffix        = "${module.alb_ingress_green.target_group_arn_suffix}"
   target_3xx_count_threshold     = "${var.alb_target_group_alarms_3xx_threshold}"
   target_4xx_count_threshold     = "${var.alb_target_group_alarms_4xx_threshold}"
   target_5xx_count_threshold     = "${var.alb_target_group_alarms_5xx_threshold}"
