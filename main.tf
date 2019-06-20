@@ -165,11 +165,11 @@ resource "aws_codedeploy_deployment_group" "default" {
       }
 
       target_group {
-        name = "${var.alb_target_group_blue_arn}"
+        name = "${module.alb_ingress_prod.target_group_name}"
       }
 
       target_group {
-        name = "${var.alb_target_group_green_arn}"
+        name = "${module.alb_ingress_test.target_group_name}"
       }
 
       test_traffic_route {
@@ -225,11 +225,11 @@ resource "aws_codedeploy_deployment_group" "with_ssl" {
       }
 
       target_group {
-        name = "${var.alb_target_group_blue_arn}"
+        name = "${module.alb_ingress_prod.target_group_name}"
       }
 
       target_group {
-        name = "${var.alb_target_group_green_arn}"
+        name = "${module.alb_ingress_test.target_group_name}"
       }
 
       test_traffic_route {

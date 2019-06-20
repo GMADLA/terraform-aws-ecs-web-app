@@ -636,16 +636,6 @@ variable "alb_test_listener_arn" {
   description = "The ALB Test Listener ARN"
 }
 
-variable "alb_target_group_blue_arn" {
-  type        = "string"
-  description = "The ALB target group ARN for the blue service"
-}
-
-variable "alb_target_group_green_arn" {
-  type        = "string"
-  description = "The ALB target group ARN for the green service"
-}
-
 variable "alb_ingress_prod_listener_arns_count" {
   type        = "string"
   default     = "0"

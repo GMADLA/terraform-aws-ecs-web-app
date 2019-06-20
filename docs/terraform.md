@@ -109,8 +109,6 @@
 | alb_prod_listener_arn | ALB production listener arn for Blue/Green | string | `` | no |
 | alb_ssl_listener_arn | ALB SSL listener arn  for Blue/Green | string | `` | no |
 | alb_test_listener_arn | ALB test listener arn  for Blue/Green | string | `` | no |
-| alb_target_group_blue_arn | ALB blue target group arn | string | `` | no |
-| alb_target_group_green_arn | ALB green target group arn | string | `` | no |
 | alb_ingress_prod_listener_arns_count | The number of production ingress listeners | string | `0` | no |
 
 ## Outputs
