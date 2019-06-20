@@ -130,7 +130,7 @@ resource "aws_codedeploy_deployment_group" "default" {
   app_name               = "${aws_codedeploy_app.default.name}"
   deployment_config_name = "CodeDeployDefault.ECSAllAtOnce"
   deployment_group_name  = "${module.codedeploy_group_label.id}"
-  service_role_arn       =  "${module.ecs_alb_service_task.service_role_arn}"
+  service_role_arn       =  "${module.ecs_bg_codepipeline.default_role_arn}"
 
   auto_rollback_configuration {
     enabled = true
@@ -184,7 +184,7 @@ resource "aws_codedeploy_deployment_group" "with_ssl" {
   app_name               = "${aws_codedeploy_app.default.name}"
   deployment_config_name = "CodeDeployDefault.ECSAllAtOnce"
   deployment_group_name  = "${module.codedeploy_group_label.id}"
-  service_role_arn       = "${module.ecs_alb_service_task.service_role_arn}"
+  service_role_arn       = "${module.ecs_bg_codepipeline.default_role_arn}"
 
   trigger_configuration {
     trigger_events     = ["DeploymentSuccess", "DeploymentFailure", "DeploymentReady", "DeploymentFailure"]
