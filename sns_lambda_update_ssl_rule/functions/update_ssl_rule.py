@@ -1,3 +1,4 @@
+import os
 import json, boto3
 
 def lambda_handler(event, context):
@@ -18,6 +19,12 @@ def lambda_handler(event, context):
 
     i = 0
     while i < len(https_listener_rules):
+
+
+        if https_listener_rules[i]['IsDefault']==True:
+            i +=1
+            continue
+
         rule_actions = https_listener_rules[i]['Actions']
 
         rule_modded = 0
@@ -31,7 +38,7 @@ def lambda_handler(event, context):
 
         if rule_modded==1:
             results[https_listener_rules[i]['RuleArn']] = elbv2_client.modify_rule(
-                RuleArn=https_listener_rules[i],
+                RuleArn=https_listener_rules[i]['RuleArn'],
                 Actions=rule_actions
             )
 
