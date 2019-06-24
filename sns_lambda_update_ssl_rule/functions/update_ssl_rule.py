@@ -13,6 +13,10 @@ def lambda_handler(event, context):
     http_listener = elbv2_client.describe_rules( ListenerArn=http_listener_arn)
     http_target_group_arn = get_current_http_target_group(http_listener['Rules'], arrMatches)
 
+    if http_target_group_arn==False:
+        print("Could not identify the target arn")
+        return False
+
     # Get HTTPS listener rules.
     https_listener_arn = os.environ['SSL_LISTENER_ARN']
     https_listener = elbv2_client.describe_rules(ListenerArn=https_listener_arn)
@@ -63,3 +67,9 @@ def get_current_http_target_group(http_listener_rules, arrMatches):
         while n<len(actions):
             if actions[n]['TargetGroupArn'] in arrMatches:
                 return actions[n]['TargetGroupArn']
+
+            n +=1
+
+        i +=1
+
+    return False;
