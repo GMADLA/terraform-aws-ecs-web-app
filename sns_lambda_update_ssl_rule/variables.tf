@@ -80,3 +80,9 @@ variable "ecs_cluster_name" {
   type        = "string"
   description = "The ECS Cluster Name to use in ECS Code Pipeline Deployment step"
 }
+
+variable "available_target_groups" {
+  type        = "list"
+  default     = []
+  description = "Available target groups for listener."
+}

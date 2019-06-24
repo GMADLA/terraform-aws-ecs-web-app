@@ -14,4 +14,5 @@ module "update_ssl_rule" {
   ecs_cluster_name  = "${var.ecs_cluster_name}"
   prod_listener_arn = "${var.alb_prod_listener_arn}"
   ssl_listener_arn  = "${var.alb_ssl_listener_arn}"
+  available_target_groups = ["${module.alb_ingress_blue.target_group_arn}","${module.alb_ingress_green.target_group_arn}"]
 }

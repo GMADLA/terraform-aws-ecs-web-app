@@ -8,7 +8,7 @@ def lambda_handler(event, context):
     # Get HTTP Target Group.
     http_listener_arn = os.environ['PRODUCTION_LISTENER_ARN']
     http_listener = elbv2_client.describe_rules( ListenerArn=http_listener_arn)
-    http_target_group_arn = http_listener['Rules'][0]['Actions'][0]['TargetGroupArn']
+    http_target_group_arn = get_current_http_target_group(https_listener['Rules'])
 
     # Get HTTPS listener rules.
     https_listener_arn = os.environ['SSL_LISTENER_ARN']
@@ -16,22 +16,20 @@ def lambda_handler(event, context):
     https_listener_rules = https_listener['Rules']
 
     results = {}
-
     i = 0
     while i < len(https_listener_rules):
-
 
         if https_listener_rules[i]['IsDefault']==True:
             i +=1
             continue
 
-        rule_actions = https_listener_rules[i]['Actions']
+        actions = https_listener_rules[i]['Actions']
 
         rule_modded = 0
         n = 0
-        while n < len(rule_actions):
-            if rule_actions[n]['Type'] == "forward":
-                rule_actions[n]['TargetGroupArn']=http_target_group_arn
+        while n < len(actions):
+            if actions[n]['TargetGroupArn'] in arrMatches:
+                actions[n]['TargetGroupArn']=http_target_group_arn
                 rule_modded=1
 
             n +=1
@@ -39,9 +37,28 @@ def lambda_handler(event, context):
         if rule_modded==1:
             results[https_listener_rules[i]['RuleArn']] = elbv2_client.modify_rule(
                 RuleArn=https_listener_rules[i]['RuleArn'],
-                Actions=rule_actions
+                Actions=actions
             )
 
         i +=1
 
     return results
+
+# Returns the current B/G target group from a list of lister rules.
+def get_current_http_target_group(http_listener_rules):
+    available_target_groups = os.environ['AVAILABLE_TARGET_GROUPS']
+    arrMatches = available_target_groups.split(',')
+
+    i=0
+    while i < len(http_listener_rules):
+
+        # Continue if default listener rule.
+        if https_listener_rules[i]['IsDefault']==True:
+            i +=1
+            continue
+
+        actions = http_listener_rules[i]['Actions']
+        n=0
+        while n<len(actions):
+            if actions[n]['TargetGroupArn'] in arrMatches:
+                return actions[n]['TargetGroupArn']
