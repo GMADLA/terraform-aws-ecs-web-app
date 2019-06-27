@@ -86,7 +86,7 @@ resource "aws_lambda_function" "update_ssl_rule" {
   environment {
     variables = {
       ELB_REGION              = "${var.elb_region}"
-      PRODUCTION_LISTENER_ARN = "${var.prod_listener_arn}"
+      HTTP_LISTENER_ARN       = "${var.http_listener_arn}"
       SSL_LISTENER_ARN        = "${var.ssl_listener_arn}"
       AVAILABLE_TARGET_GROUPS = "${join(",",  var.available_target_groups)}"
     }

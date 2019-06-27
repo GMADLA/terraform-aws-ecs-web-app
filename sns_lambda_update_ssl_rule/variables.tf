@@ -68,7 +68,7 @@ variable "elb_region" {
   description = "The region of the ELB is found"
 }
 
-variable "prod_listener_arn" {
+variable "http_listener_arn" {
   description = "Production (HTTP) listener ARN"
 }
 

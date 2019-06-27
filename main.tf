@@ -56,7 +56,7 @@ module "alb_ingress_blue" {
 
   unauthenticated_priority = "${var.alb_ingress_listener_unauthenticated_priority}"
 
-  unauthenticated_listener_arns       = ["${var.alb_prod_listener_arn}", "${var.alb_ssl_listener_arn}"]
+  unauthenticated_listener_arns       = ["${var.alb_http_listener_arn}", "${var.alb_ssl_listener_arn}"]
   unauthenticated_listener_arns_count = "${var.alb_ingress_prod_listener_arns_count}"
 }
 
@@ -162,7 +162,7 @@ resource "aws_codedeploy_deployment_group" "default" {
   load_balancer_info {
     target_group_pair_info {
       prod_traffic_route {
-        listener_arns = ["${var.alb_prod_listener_arn}"]
+        listener_arns = ["${var.alb_http_listener_arn}"]
       }
 
       target_group {
@@ -222,7 +222,7 @@ resource "aws_codedeploy_deployment_group" "with_ssl" {
   load_balancer_info {
     target_group_pair_info {
       prod_traffic_route {
-        listener_arns = ["${var.alb_prod_listener_arn}"]
+        listener_arns = ["${var.alb_http_listener_arn}"]
       }
 
       target_group {

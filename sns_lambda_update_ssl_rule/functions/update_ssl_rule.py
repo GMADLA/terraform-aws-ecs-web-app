@@ -9,7 +9,7 @@ def lambda_handler(event, context):
     arrMatches = available_target_groups.split(',')
 
     # Get HTTP Target Group.
-    http_listener_arn = os.environ['PRODUCTION_LISTENER_ARN']
+    http_listener_arn = os.environ['HTTP_LISTENER_ARN']
     http_listener = elbv2_client.describe_rules( ListenerArn=http_listener_arn)
     http_target_group_arn = get_current_http_target_group(http_listener['Rules'], arrMatches)
 

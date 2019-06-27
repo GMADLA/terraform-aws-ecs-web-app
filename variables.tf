@@ -620,7 +620,7 @@ variable "authentication_oidc_user_info_endpoint" {
   default     = ""
 }
 
-variable "alb_prod_listener_arn" {
+variable "alb_http_listener_arn" {
   type        = "string"
   description = "The ALB Production Listener ARN"
 }
@@ -639,5 +639,5 @@ variable "alb_test_listener_arn" {
 variable "alb_ingress_prod_listener_arns_count" {
   type        = "string"
   default     = "0"
-  description = "The number of production ingress listeners for Blue Green"
+  description = "The number of production ingress listeners for Blue Green, usually http/s"
 }
