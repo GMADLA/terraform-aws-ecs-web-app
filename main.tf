@@ -242,7 +242,7 @@ resource "aws_codedeploy_deployment_group" "with_ssl" {
 
 module "ecs_bg_codepipeline" {
   enabled               = "${var.codepipeline_enabled}"
-  source                = "git::https://github.com/GMADLA/terraform-aws-ecs-codepipeline-bg.git?ref=tags/0.0.8"
+  source                = "git::https://github.com/GMADLA/terraform-aws-ecs-codepipeline.git?ref=tags/0.10.0"
   name                  = "${var.name}"
   namespace             = "${var.namespace}"
   stage                 = "${var.stage}"
@@ -261,6 +261,8 @@ module "ecs_bg_codepipeline" {
   ecs_cluster_name      = "${var.ecs_cluster_name}"
   privileged_mode       = "true"
   poll_source_changes   = "${var.poll_source_changes}"
+
+  pipeline_bucket_lifecycle_enabled = "true"
 
   webhook_enabled             = "${var.webhook_enabled}"
   webhook_target_action       = "${var.webhook_target_action}"
