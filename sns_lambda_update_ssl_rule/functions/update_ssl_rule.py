@@ -3,17 +3,17 @@ import json, boto3
 
 def lambda_handler(event, context):
     print("Trigger Event: ")
-    print(event);
+    print(event)
     region = os.environ['ELB_REGION']
     elbv2_client = boto3.client('elbv2', region_name=region)
 
     available_target_groups = os.environ['AVAILABLE_TARGET_GROUPS']
-    arrMatches = available_target_groups.split(',')
+    arr_available_target_groups = available_target_groups.split(',')
 
     # Get HTTP Target Group.
     http_listener_arn = os.environ['HTTP_LISTENER_ARN']
     http_listener = elbv2_client.describe_rules( ListenerArn=http_listener_arn)
-    http_target_group_arn = get_current_http_target_group(http_listener['Rules'], arrMatches)
+    http_target_group_arn = get_current_http_target_group(http_listener['Rules'], arr_available_target_groups)
 
     if http_target_group_arn==False:
         print("Could not identify the target arn")
@@ -41,7 +41,7 @@ def lambda_handler(event, context):
         n = 0
         while n < len(actions):
             try:
-                if actions[n]['TargetGroupArn'] in arrMatches:
+                if actions[n]['TargetGroupArn'] in arr_available_target_groups:
                     actions[n]['TargetGroupArn']=http_target_group_arn
                     rule_modded=1
             except Exception as e:
@@ -61,7 +61,7 @@ def lambda_handler(event, context):
     return results
 
 # Returns the current B/G target group from a list of lister rules.
-def get_current_http_target_group(http_listener_rules, arrMatches):
+def get_current_http_target_group(http_listener_rules, arr_available_target_groups):
 
     i=0
     while i < len(http_listener_rules):
@@ -76,7 +76,7 @@ def get_current_http_target_group(http_listener_rules, arrMatches):
         while n<len(actions):
 
             try:
-                if actions[n]['TargetGroupArn'] in arrMatches:
+                if actions[n]['TargetGroupArn'] in arr_available_target_groups:
                     return actions[n]['TargetGroupArn']
             except Exception as e:
                 pass
