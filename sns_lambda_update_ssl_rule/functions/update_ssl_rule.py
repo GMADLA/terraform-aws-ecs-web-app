@@ -18,9 +18,9 @@ def lambda_handler(event, context):
     if http_target_group_arn==False:
         print("Could not identify the target arn")
         return False
-    else:
-        print("Current HTTP target group: ")
-        print(http_target_group_arn)
+
+    print("Current HTTP target group: ")
+    print(http_target_group_arn)
 
     # Get HTTPS listener rules.
     https_listener_arn = os.environ['SSL_LISTENER_ARN']
@@ -37,19 +37,21 @@ def lambda_handler(event, context):
 
         actions = https_listener_rules[i]['Actions']
 
-        rule_modded = 0
+        modify_rule = 0
         n = 0
         while n < len(actions):
             try:
-                if actions[n]['TargetGroupArn'] in arr_available_target_groups:
+                target_is_updated = check_target_update(actions[n]['TargetGroupArn'], arr_available_target_groups, http_target_group_arn)
+
+                if target_is_updated:
                     actions[n]['TargetGroupArn']=http_target_group_arn
-                    rule_modded=1
+                    modify_rule=1
             except Exception as e:
                 pass
 
             n +=1
 
-        if rule_modded==1:
+        if modify_rule==1:
             print("Updating SSL listener rules..")
             results[https_listener_rules[i]['RuleArn']] = elbv2_client.modify_rule(
                 RuleArn=https_listener_rules[i]['RuleArn'],
@@ -58,6 +60,13 @@ def lambda_handler(event, context):
 
         i +=1
 
+    # For ECS After Allow Test Traffic hook
+    try:
+        send_codedeploy_validation_status(event.deploymentId, event.LifecycleEventHookExecutionId, results)
+    except Exception as e:
+        pass
+
+    print(results)
     return results
 
 # Returns the current B/G target group from a list of lister rules.
@@ -85,4 +94,24 @@ def get_current_http_target_group(http_listener_rules, arr_available_target_grou
 
         i +=1
 
-    return False;
+    return False
+
+
+# Check old target group is associated w/out available target and different.
+def check_target_update(old_target_group, arr_available_target_groups, new_target_group):
+
+    return old_target_group in arr_available_target_groups and old_target_group != new_target_group
+
+
+# Sends notification to CodeDeploy on hook status...
+def send_codedeploy_validation_status(deployment_id, execution_id, results):
+    region = os.environ['ELB_REGION']
+    codedeploy_client = boto3.client('elcodedeploybv2', region_name=region)
+
+    status = ('Succeeded', 'Failed')[len(results) > 0]
+
+    return codedeploy_client.put_lifecycke_event_hook_execution_status(
+        deploymentId = deployment_id,
+        lifecycleEventHookExecutionId = execution_id,
+        status = status
+    )
