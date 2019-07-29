@@ -62,9 +62,10 @@ def lambda_handler(event, context):
 
     # For ECS After Allow Test Traffic hook
     try:
-        send_codedeploy_validation_status(event.DeploymentId, event.LifecycleEventHookExecutionId, results)
+        send_codedeploy_validation_status(event['DeploymentId'], event['LifecycleEventHookExecutionId'], results)
     except Exception as e:
-        pass
+        print('Exception: ')
+        print(e)
 
     print(results)
     return results
@@ -108,10 +109,11 @@ def send_codedeploy_validation_status(deployment_id, execution_id, results):
     region = os.environ['ELB_REGION']
     codedeploy_client = boto3.client('codedeploy', region_name=region)
 
-    status = ('Succeeded', 'Failed')[len(results) > 0]
+    status = ('Failed', 'Succeeded')[len(results) > 0]
+    print(status)
 
     return codedeploy_client.put_lifecycle_event_hook_execution_status(
-        deploymentId = deployment_id,
-        lifecycleEventHookExecutionId = execution_id,
-        status = status
+        deploymentId=deployment_id,
+        lifecycleEventHookExecutionId=execution_id,
+        status=status
     )
