@@ -4,7 +4,7 @@ import json, boto3
 def lambda_handler(event, context):
     print("Trigger Event: ")
     print(event)
-    region = os.environ['ELB_REGION']
+    region = os.environ['AWS_REGION']
     elbv2_client = boto3.client('elbv2', region_name=region)
 
     available_target_groups = os.environ['AVAILABLE_TARGET_GROUPS']
@@ -64,7 +64,7 @@ def lambda_handler(event, context):
     try:
         send_codedeploy_validation_status(event['DeploymentId'], event['LifecycleEventHookExecutionId'], results)
     except Exception as e:
-        print('Exception: ')
+        print('Recoverable Exception: ')
         print(e)
 
     print(results)
@@ -106,10 +106,10 @@ def check_target_update(old_target_group, arr_available_target_groups, new_targe
 
 # Sends notification to CodeDeploy on hook status...
 def send_codedeploy_validation_status(deployment_id, execution_id, results):
-    region = os.environ['ELB_REGION']
+    region = os.environ['AWS_REGION']
     codedeploy_client = boto3.client('codedeploy', region_name=region)
-
     status = ('Failed', 'Succeeded')[len(results) > 0]
+
     print(status)
 
     return codedeploy_client.put_lifecycle_event_hook_execution_status(
