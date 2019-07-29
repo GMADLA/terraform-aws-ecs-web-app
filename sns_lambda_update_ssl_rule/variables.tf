@@ -87,12 +87,12 @@ variable "available_target_groups" {
   description = "Available target groups for listener."
 }
 
-variable "code_deploy_app_name" {
+variable "codedeploy_app_name" {
   type        = "string"
   description = "Code Deploy Application Name Lambda needs to update w/status"
 }
 
-variable "code_deploy_group_name" {
+variable "codedeploy_group_name" {
   type        = "string"
   description = "Code Deploy Group Name Lambda needs to update w/status"
 }

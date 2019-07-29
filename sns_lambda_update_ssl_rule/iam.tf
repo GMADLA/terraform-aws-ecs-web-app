@@ -91,7 +91,7 @@ data "aws_iam_policy_document" "lambda_basic" {
       ]
 
       resources = [
-          "${format("arn:aws:codedeploy:%s:*:deploymentgroup/%s/%s", var.aws_region, var.code_deploy_app_name, var.code_deploy_group_name)}"
+          "${format("arn:aws:codedeploy:%s:*:deploymentgroup/%s/%s", var.aws_region, var.codedeploy_app_name, var.codedeploy_group_name)}"
       ]
   }
 }
