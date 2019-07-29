@@ -62,7 +62,7 @@ def lambda_handler(event, context):
 
     # For ECS After Allow Test Traffic hook
     try:
-        send_codedeploy_validation_status(event.deploymentId, event.LifecycleEventHookExecutionId, results)
+        send_codedeploy_validation_status(event.DeploymentId, event.LifecycleEventHookExecutionId, results)
     except Exception as e:
         pass
 
