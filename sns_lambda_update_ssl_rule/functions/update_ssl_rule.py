@@ -106,11 +106,11 @@ def check_target_update(old_target_group, arr_available_target_groups, new_targe
 # Sends notification to CodeDeploy on hook status...
 def send_codedeploy_validation_status(deployment_id, execution_id, results):
     region = os.environ['ELB_REGION']
-    codedeploy_client = boto3.client('elcodedeploybv2', region_name=region)
+    codedeploy_client = boto3.client('codedeploy', region_name=region)
 
     status = ('Succeeded', 'Failed')[len(results) > 0]
 
-    return codedeploy_client.put_lifecycke_event_hook_execution_status(
+    return codedeploy_client.put_lifecycle_event_hook_execution_status(
         deploymentId = deployment_id,
         lifecycleEventHookExecutionId = execution_id,
         status = status
