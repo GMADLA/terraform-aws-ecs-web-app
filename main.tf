@@ -250,6 +250,7 @@ module "ecs_bg_codepipeline" {
   stage                 = "${var.stage}"
   attributes            = "${var.attributes}"
   github_oauth_token    = "${var.github_oauth_token}"
+  github_webhooks_token = "${var.github_webhooks_token}"
   github_webhook_events = "${var.github_webhook_events}"
   repo_owner            = "${var.repo_owner}"
   repo_name             = "${var.repo_name}"
@@ -271,6 +272,8 @@ module "ecs_bg_codepipeline" {
   webhook_authentication      = "${var.webhook_authentication}"
   webhook_filter_json_path    = "${var.webhook_filter_json_path}"
   webhook_filter_match_equals = "${var.webhook_filter_match_equals}"
+
+  s3_bucket_force_destroy = "${var.codepipeline_s3_bucket_force_destroy}"
 
   code_deploy_sns_topic_arn   = "${module.update_ssl_rule.this_sns_topic_arn}"
   code_deploy_lambda_hook_arns   = "${module.update_ssl_rule.update_ssl_lambda_function_arn}"
