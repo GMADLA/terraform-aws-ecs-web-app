@@ -31,42 +31,23 @@ def lambda_handler(event, context):
     i = 0
     while i < len(https_listener_rules):
 
+        # Skip default rule
         if https_listener_rules[i]['IsDefault']==True:
             i +=1
             continue
 
         actions = https_listener_rules[i]['Actions']
+        actions, modify = process_actions(actions, http_target_group_arn, arr_available_target_groups)
 
-        modify_rule = 0
-        n = 0
-        while n < len(actions):
-            try:
-                update_target = check_target_update(actions[n]['TargetGroupArn'], arr_available_target_groups)
-
-                if update_target:
-                    actions[n]['TargetGroupArn']=http_target_group_arn
-                    modify_rule=1
-            except Exception as e:
-                pass
-
-            n +=1
-
-        if modify_rule==1:
+        if modify==1:
             print("Updating SSL listener rules..")
-            results[https_listener_rules[i]['RuleArn']] = elbv2_client.modify_rule(
-                RuleArn=https_listener_rules[i]['RuleArn'],
-                Actions=actions
-            )
+            rule_arn = https_listener_rules[i]['RuleArn']
+            results[rule_arn] = modify_rules(elbv2_client, rule_arn, actions)
 
         i +=1
 
     # For ECS After Allow Test Traffic hook
-    try:
-        send_codedeploy_validation_status(event['DeploymentId'], event['LifecycleEventHookExecutionId'], results)
-    except Exception as e:
-        print('Recoverable Exception: ')
-        print(e)
-
+    send_codedeploy_validation_status(event, results)
     print(results)
     return results
 
@@ -98,6 +79,21 @@ def get_current_http_target_group(http_listener_rules, arr_available_target_grou
     return False
 
 
+def process_actions(actions, http_target_group_arn, arr_available_target_groups):
+    modify = 0
+    for ak, action in enumerate(actions):
+        try:
+            if action['Type'] == "forward" and check_target_update(action['TargetGroupArn'], arr_available_target_groups):
+                actions[ak]['TargetGroupArn']=http_target_group_arn
+                for tgk, target_group in enumerate(action['ForwardConfig']['TargetGroups']):
+                    if check_target_update(target_group['TargetGroupArn'], arr_available_target_groups):
+                        actions[ak]['ForwardConfig']['TargetGroups'][tgk]['TargetGroupArn']=http_target_group_arn
+                modify=1
+        except Exception as e:
+            print(e)
+
+    return (actions), modify
+
 # Check old target group is associated w/out available target and different.
 # Be wary I found its possible the Listener rule is updated at the initial Ready Stage.
 # DO NOT TRY COMPARING OLD AN NEW, SIMPLY ALWAYS UPDATE TO MATCH HTTP IF ONE OF THE AVAILABLE TARGETS
@@ -107,15 +103,29 @@ def check_target_update(old_target_group, arr_available_target_groups):
 
 
 # Sends notification to CodeDeploy on hook status...
-def send_codedeploy_validation_status(deployment_id, execution_id, results):
+def send_codedeploy_validation_status(event, results):
     region = os.environ['REGION']
     codedeploy_client = boto3.client('codedeploy', region_name=region)
     status = ('Failed', 'Succeeded')[len(results) > 0]
-
     print(status)
 
-    return codedeploy_client.put_lifecycle_event_hook_execution_status(
-        deploymentId=deployment_id,
-        lifecycleEventHookExecutionId=execution_id,
-        status=status
-    )
+    try:
+        return codedeploy_client.put_lifecycle_event_hook_execution_status(
+            deploymentId=event['DeploymentId'],
+            lifecycleEventHookExecutionId=event['LifecycleEventHookExecutionId'],
+            status=status
+        )
+    except Exception as e:
+        print("Recoverable Exception: ")
+        print(e)
+        return False
+
+
+def modify_rules(elbv2_client, arn, actions):
+    try:
+        return elbv2_client.modify_rule(
+            RuleArn=arn,
+            Actions=actions
+        )
+    except Exception as e:
+        print(e)
