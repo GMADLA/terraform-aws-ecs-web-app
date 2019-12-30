@@ -27,6 +27,10 @@ def lambda_handler(event, context):
     https_listener = elbv2_client.describe_rules(ListenerArn=https_listener_arn)
     https_listener_rules = https_listener['Rules']
 
+    print("Current HTTPS target group: ")
+    https_target_group_arn = get_current_http_target_group(https_listener['Rules'], arr_available_target_groups)
+    print(https_target_group_arn)
+
     results = {}
     i = 0
     while i < len(https_listener_rules):
@@ -47,8 +51,9 @@ def lambda_handler(event, context):
         i +=1
 
     # For ECS After Allow Test Traffic hook
-    send_codedeploy_validation_status(event, results)
     print(results)
+    send_codedeploy_validation_status(event, results)
+
     return results
 
 # Returns the current B/G target group from a list of lister rules.
