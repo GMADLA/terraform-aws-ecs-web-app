@@ -1,11 +1,14 @@
 import os
 import json, boto3
 
+region = os.environ['REGION']
+elbv2_client = boto3.client('elbv2', region_name=region)
+codedeploy_client = boto3.client('codedeploy', region_name=region)
+
 def lambda_handler(event, context):
     print("Trigger Event: ")
     print(event)
-    region = os.environ['REGION']
-    elbv2_client = boto3.client('elbv2', region_name=region)
+
 
     available_target_groups = os.environ['AVAILABLE_TARGET_GROUPS']
     arr_available_target_groups = available_target_groups.split(',')
@@ -46,7 +49,7 @@ def lambda_handler(event, context):
         if modify==1:
             print("Updating SSL listener rules..")
             rule_arn = https_listener_rules[i]['RuleArn']
-            results[rule_arn] = modify_rules(elbv2_client, rule_arn, actions)
+            results[rule_arn] = modify_rules(rule_arn, actions)
 
         i +=1
 
@@ -110,7 +113,7 @@ def check_target_update(old_target_group, arr_available_target_groups):
 # Sends notification to CodeDeploy on hook status...
 def send_codedeploy_validation_status(event, results):
     region = os.environ['REGION']
-    codedeploy_client = boto3.client('codedeploy', region_name=region)
+
     status = ('Failed', 'Succeeded')[len(results) > 0]
     print(status)
 
@@ -126,7 +129,7 @@ def send_codedeploy_validation_status(event, results):
         return False
 
 
-def modify_rules(elbv2_client, arn, actions):
+def modify_rules(arn, actions):
     try:
         return elbv2_client.modify_rule(
             RuleArn=arn,
