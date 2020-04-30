@@ -69,12 +69,14 @@ def get_current_http_target_group(http_listener_rules, arr_available_target_grou
 
         actions = http_listener_rules[i]['Actions']
         n=0
+
         while n<len(actions):
-
-            for tg in actions[n]['ForwardConfig']['TargetGroups']:
-                if tg['TargetGroupArn'] in arr_available_target_groups and tg['Weight'] is 100:
-                    return tg['TargetGroupArn']
-
+            try:
+                for tg in actions[n]['ForwardConfig']['TargetGroups']:
+                    if tg['TargetGroupArn'] in arr_available_target_groups and (tg['Weight'] is 100 or tg['Weight'] is 1) :
+                        return tg['TargetGroupArn']
+            except Exception as e:
+                print(e)
             n +=1
 
         i +=1
